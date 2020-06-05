@@ -1,8 +1,8 @@
 import torch
 
-device = 'cuda'
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-def train(model, optimizer, dataloader, epochs, losses):
+def train(model, optimizer, dataloader, epochs, losses, scheduler=None):
     model.train()
     for epoch in range(1, epochs + 1):
         print(f"Epoch \t {epoch}")
@@ -16,10 +16,12 @@ def train(model, optimizer, dataloader, epochs, losses):
             
             optimizer.zero_grad()
             loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 1)
             optimizer.step()
             
+            if scheduler:
+                scheduler.step()
             losses.append(loss.item())
-            if i % 20 == 0:print(loss.item())
         if epoch % 5 == 0: torch.save({'model': model.state_dict(), 'optimizer': optimizer.state_dict(), 'losses': losses}, 'models/model.pth')
         
         
