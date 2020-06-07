@@ -186,7 +186,7 @@ def download_dataset(json_path, out_path, samples_per_img=100, num_threads=16, n
                 
                 
 def main():
-    json_path = 'datasets/dataset_export.json.json'
+    json_path = 'datasets/dataset_export.json'
     samples_per_img = 200
     
     
