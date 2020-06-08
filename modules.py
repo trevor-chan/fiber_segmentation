@@ -23,9 +23,10 @@ class BrightfieldPredictor:
         cfg.SOLVER.MAX_ITER = 30000
         cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 512
         cfg.MODEL.ROI_HEADS.NUM_CLASSES = 1  # only has one class (cell)
-        #cfg.INPUT.MASK_FORMAT='bitmask'
+        cfg.INPUT.MASK_FORMAT='bitmask'
         cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = confidence   # set the testing threshold for this model
         cfg.TEST.DETECTIONS_PER_IMAGE = 1000
+        cfg.MODEL.DEVICE='cuda' if torch.cuda.is_available() else 'cpu'
 
         if weights_path is not None:
             cfg.MODEL.WEIGHTS = weights_path
