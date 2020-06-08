@@ -76,7 +76,7 @@ class BrightfieldPredictor:
 
         v = Visualizer(im[:, :, ::-1],
                        metadata=self.metadata, 
-                       scale=8.0, 
+                       scale=3.0, 
                        #instance_mode=ColorMode.IMAGE_BW
         )
         v = v.draw_instance_predictions(all_instances.to("cpu"))
