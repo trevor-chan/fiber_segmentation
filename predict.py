@@ -1,7 +1,11 @@
+import os
 import argparse
-from modules import BrightfieldPredictor
 import cv2
 from PIL import Image
+    
+from google_drive_downloader import GoogleDriveDownloader as gdd
+
+from modules import BrightfieldPredictor
 
 def main():
     parser = argparse.ArgumentParser()
@@ -15,15 +19,18 @@ def main():
                         '-c',
                         type=float,
                         default=0.6)
-    parser.add_argument('--weights_path',
-                        '-w',
-                        default='models/256/model_final.pth')
     
     args = parser.parse_args()
     
-    image = cv2.imread(args.in_path)
+
+
+    if not os.path.exists('models/bright-field.pth'):
+        gdd.download_file_from_google_drive(file_id='12I6W9SeHFmDSHLoJKp3iNSry3gw8ILAJ',
+                                            dest_path='./models/bright-field.pth',
+                                            unzip=False)
     
-    model = BrightfieldPredictor(weights_path=args.weights_path,
+    image = cv2.imread(args.in_path)
+    model = BrightfieldPredictor(weights_path='models/bright-field.pth',
                                  confidence=args.confidence)
     
     out_image = model.predict_large(image)
