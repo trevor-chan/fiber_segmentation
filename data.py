@@ -30,12 +30,13 @@ def compute_bbox(mask):
     return [xmin, ymin, xmax, ymax]
 
 def to_coco(dataset_path):
-    image_paths = absolute_paths(os.path.join(dataset_path, 'images'))
-    target_paths = absolute_paths(os.path.join(dataset_path, 'targets'))
+    image_paths = [img_path for img_path in absolute_paths(os.path.join(dataset_path, 'images')) if img_path.endswith('.png')]
+    #target_paths = absolute_paths(os.path.join(dataset_path, 'targets'))
     
     dataset_dicts = []
     
-    for idx, (image_path, target_path) in enumerate(zip(image_paths, target_paths)):
+    for idx, image_path in enumerate(image_paths):
+        target_path = os.path.join(dataset_path, 'targets', os.path.splitext(os.path.basename(image_path))[0] + '.pkl')
         with open(target_path, 'rb') as f:
             target = pickle.load(f)
         
@@ -72,7 +73,7 @@ def get_image_from_url(url):
     img = Image.open(BytesIO(response.content)).convert('RGB')
     return img
 
-def augment(image, masks):
+def augment(image, masks, crop_size):
         # Brightness
         brightness_factor = np.random.normal()*0.2 + 1
         image = TF.adjust_brightness(image, brightness_factor)
@@ -83,7 +84,7 @@ def augment(image, masks):
 
         # Affine
         angle = np.random.uniform(-180, 180)
-        shear = np.random.normal()*20
+        shear = np.random.normal()*25
         scale = np.random.uniform(0.5, 2.0)
         translate = np.random.randint(-30, 30, size=2).tolist()
         image = TF.affine(image, angle, translate, scale, shear, resample=PIL.Image.BILINEAR, fillcolor=None)
@@ -91,7 +92,7 @@ def augment(image, masks):
         
         # Random crop
         i, j, h, w = transforms.RandomCrop.get_params(
-            image, output_size=(256, 256))
+            image, output_size=(crop_size, crop_size))
         
         image = TF.crop(image, i, j, h, w)
         masks = [TF.crop(mask, i, j, h, w) for mask in masks]
@@ -104,9 +105,6 @@ def augment(image, masks):
         if np.random.random() > 0.5:
             image = TF.vflip(image)
             masks = [TF.vflip(mask) for mask in masks]
-        # Transform to tensor
-        #image = TF.to_tensor(image)
-        #masks = [TF.to_tensor(mask) for mask in masks]
         
         # squeeze and binarize
         masks = [(np.array(mask)[:, :, 0] > 0.5).astype(np.uint8) for mask in masks]
@@ -116,26 +114,27 @@ def augment(image, masks):
         return image, masks
 
 class Worker(Process):
-    def __init__(self, task_queue, result_queue, img, masks, out_path):
+    def __init__(self, task_queue, result_queue, img, masks, out_path, crop_size):
         super().__init__()
         self.task_queue = task_queue
         self.result_queue = result_queue
         self.img = img
         self.masks = masks
         self.out_path = out_path
+        self.crop_size = crop_size
         
     def run(self):
         proc_name = self.name
         while True:
             index = self.task_queue.get()
             if index == -1: break
-            sub_img, sub_masks = augment(self.img, self.masks)
+            sub_img, sub_masks = augment(self.img, self.masks, self.crop_size)
             target = {'masks': sub_masks, 'size': sub_img.size}
             save_mask_target(sub_img, target, f'{index:05d}', dataset_path=self.out_path)            
             self.result_queue.put(index)
         return
     
-def download_dataset(json_path, out_path, samples_per_img=100, num_threads=16, num_processes=4, selected_ids=None):
+def download_dataset(json_path, out_path, samples_per_img=100, num_threads=16, num_processes=4, selected_ids=None, crop_size=256):
 
     if os.path.exists(out_path):
         shutil.rmtree(out_path)
@@ -165,7 +164,7 @@ def download_dataset(json_path, out_path, samples_per_img=100, num_threads=16, n
             
             workers = []
             for proc_index in range(num_processes):
-                p = Worker(task_queue, result_queue, img, masks, out_path)
+                p = Worker(task_queue, result_queue, img, masks, out_path, crop_size)
                 p.daemon = True
                 p.start()
                 workers.append(p)
@@ -182,34 +181,32 @@ def download_dataset(json_path, out_path, samples_per_img=100, num_threads=16, n
                 task_queue.put(-1)
             for worker in workers:
                 worker.join()
-                
-                
+
                 
 def main():
+    ##########################
     json_path = 'datasets/dataset_export.json'
-    samples_per_img = 200
-    
+    samples_per_img = 300
+    crop_size = 256
+    ##########################
     
     train_dataset = ['image_part_002.jpg',
                      'image_part_001.jpg',
                      'image_part_006.jpg',
                      'image_part_003.jpg',
+                     'image_part_004.jpg',
+                     'MC171180.JPG',
                      'MC171177.JPG',
                      'MC171179.JPG',
                      'MC171181.JPG',
                      'MC171178.JPG']
     
-    val_dataset = ['MC171180.JPG',
-                   'image_part_004.jpg']
     
     download_dataset(json_path,
-                     'datasets/cells_train',
+                     'datasets/cells_train_256',
                      samples_per_img=samples_per_img,
-                     selected_ids=train_dataset)
-    download_dataset(json_path,
-                 'datasets/cells_val',
-                 samples_per_img=samples_per_img,
-                 selected_ids=val_dataset)
-                
+                     selected_ids=train_dataset,
+                     crop_size=crop_size)
+
 if __name__ == '__main__':
     main()
