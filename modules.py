@@ -72,17 +72,60 @@ class BrightfieldPredictor:
                 all_instances.append(sub_instances)
 
         all_instances = Instances.cat(all_instances)
+        return all_instances
 
-
+    def visualize(self, im, all_instances):
         v = Visualizer(im[:, :, ::-1],
-                       metadata=self.metadata, 
-                       scale=2.0, 
-                       #instance_mode=ColorMode.IMAGE_BW
+                  metadata=self.metadata, 
+                  scale=2.0, 
+                  #instance_mode=ColorMode.IMAGE_BW
         )
         v = v.draw_instance_predictions(all_instances.to("cpu"))
         return v.get_image()[:, :, ::-1]
+
+    def predict_large_overlap(self, im, span = 256, stride=128):
+        print('test overlap')
+        im_height, im_width, _ = im.shape
+        all_instances = []
+
+        for i in range(0, im_height, stride):
+            for j in range(0, im_width, stride):
+                sub_img = im[i:i+span, j:j+span, :]
+                predictions = self.prediction_model(sub_img)
+
+                sub_instances = offset_instances(predictions['instances'], (j, i), (im_height, im_width))
+
+                all_instances.append(sub_instances)
+                all_instances.append(sub_instances)
+
+        all_instances = Instances.cat(all_instances)
+        return all_instances
     
-    
+
+#def nonmax_suppression(instances):
+
+
+def exclude_boundary(boxes, masks, span, stride):
+    new_boxes = []
+    new_masks = []
+    counter = 0
+    for i in range(0,len(boxes)):
+        print(boxes[i][0])
+        print(len(boxes))
+        print(len(boxes[0]))
+        print(len(boxes[0][0]))
+        print(np.shape(boxes))
+        print(np.shape(boxes[0]))
+        cx = (boxes[i][0]+boxes[i][2])/2
+        cy = (boxes[i][1]+boxes[i][3])/2
+        if cx < (span-stride) or cx >= stride or cy < (span-stride) or cy >= stride:
+            continue
+        new_boxes[counter] =  boxes[i].clone()
+        new_masks[counter] = masks[i].clone()
+        counter += 1
+    return (new_boxes,new_masks)
+
+
 def offset_boxes(boxes, offset):
     new_boxes = boxes.clone()
     i, j = offset
@@ -100,14 +143,16 @@ def offset_masks(masks, offset):
     masks = masks.cpu()
     for mask in masks:
         polygon_mask = mask_to_polygons(mask)[0]
+        #print('\n\n')
+        #print(polygon_mask)
         for sub_polygon_mask in polygon_mask:
             sub_polygon_mask[::2] += i
             sub_polygon_mask[1::2] += j
         #polygon_mask[0][::2] += i
         #polygon_mask[0][1::2] += j
         polygon_masks.append(polygon_mask)
-        
     return polygon_masks
+
 
 def offset_instances(instances, offset, im_size):
     instance_dict = {

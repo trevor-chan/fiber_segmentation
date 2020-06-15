@@ -33,7 +33,8 @@ def main():
     model = BrightfieldPredictor(weights_path='models/bright-field.pth',
                                  confidence=args.confidence)
     
-    out_image = model.predict_large(image)
+    #out_image = model.predict_large(image)
+    out_image = model.predict_large_overlap(image)
     out_image = Image.fromarray(out_image)
     out_image.save(args.out_path)
     
