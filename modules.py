@@ -1,6 +1,7 @@
 import numpy as np
 import torch
 import cv2
+from PIL import Image
 
 from detectron2 import model_zoo
 from detectron2.engine import DefaultTrainer
@@ -59,30 +60,135 @@ class BrightfieldPredictor:
             v = v.draw_instance_predictions(outputs["instances"].to("cpu"))
 
             return v.get_image()[:, :, ::-1]
-        
-    def predict_large(self, im, stride=256):
+
+    def visualize(self, im, all_instances):
+        v = Visualizer(im[:, :, ::-1],
+                  metadata=self.metadata, 
+                  scale=2.0, 
+                  #instance_mode=ColorMode.IMAGE_BW
+        )
+        v = v.draw_instance_predictions(all_instances.to("cpu"))
+        return Image.fromarray(v.get_image()[:, :, ::-1])
+
+    def predict_large(self, im, span = 256, stride=96):
+        print('test overlap')
         im_height, im_width, _ = im.shape
         all_instances = []
-        
+
         for i in range(0, im_height, stride):
             for j in range(0, im_width, stride):
-                sub_img = im[i:i+stride, j:j+stride, :]
+                sub_img = im[i:i+span, j:j+span, :]
                 predictions = self.prediction_model(sub_img)
-                sub_instances = offset_instances(predictions['instances'], (j, i), (im_height, im_width))
+                sub_instances = predictions['instances']
+                sub_instances = exclude_boundary(sub_instances, padding=60) # 30
+                sub_instances = offset_instances(sub_instances, (j, i), (im_height, im_width))
+                all_instances.append(sub_instances)
                 all_instances.append(sub_instances)
 
         all_instances = Instances.cat(all_instances)
+        all_instances.pred_masks = np.asarray(all_instances.pred_masks, dtype=object)
+        all_instances = nms(all_instances, overlap=0.6)
+        return all_instances
+    
+
+#def nonmax_suppression(instances):
 
 
-        v = Visualizer(im[:, :, ::-1],
-                       metadata=self.metadata, 
-                       scale=2.0, 
-                       #instance_mode=ColorMode.IMAGE_BW
-        )
-        v = v.draw_instance_predictions(all_instances.to("cpu"))
-        return v.get_image()[:, :, ::-1]
+
+def exclude_boundary(instances, padding):
+    image_height, image_width = instances.image_size
+    boxes = instances.to('cpu').pred_boxes
+    """
+    keep = ((boxes.tensor[:, 0] > padding) &
+            (boxes.tensor[:, 1] > padding) &
+            (boxes.tensor[:, 2] < image_height - padding) &
+            (boxes.tensor[:, 3] < image_width - padding))
+    """
+    box_centers = boxes.get_centers()
+    keep = ((box_centers[:, 0] > padding) &
+            (box_centers[:, 1] > padding) &
+            (box_centers[:, 0] < image_height - padding) &
+            (box_centers[:, 1] < image_width - padding))
+    return instances[keep]
     
-    
+    '''alright, it's time for the big boys to take over the computer typey typey
+    things. nothing wrong can do to the bigger dinosaur. woW! that isn't a very
+    good bOx oF cElLz. 
+
+    he attac, he defend,  but most importantly...
+    he delet one char from a random spot in the program'''
+
+def nms(instances, overlap=0.7, top_k=10000):
+    """Apply non-maximum suppression at test time to avoid detecting too many
+    overlapping bounding boxes for a given object.
+    Args:
+        boxes: (tensor) The location preds for the img, Shape: [num_priors,4].
+        scores: (tensor) The class predscores for the img, Shape:[num_priors].
+        overlap: (float) The overlap thresh for suppressing unnecessary boxes.
+        top_k: (int) The Maximum number of box preds to consider.
+    Return:
+        The indices of the kept boxes with respect to num_priors.
+    """
+    boxes = instances.pred_boxes.tensor
+    scores = instances.scores
+
+    keep = scores.new(scores.size(0)).zero_().long()
+    if boxes.numel() == 0:
+        return keep
+    x1 = boxes[:, 0]
+    y1 = boxes[:, 1]
+    x2 = boxes[:, 2]
+    y2 = boxes[:, 3]
+    area = torch.mul(x2 - x1, y2 - y1)
+    v, idx = scores.sort(0)  # sort in ascending order
+    # I = I[v >= 0.01]
+    idx = idx[-top_k:]  # indices of the top-k largest vals
+    xx1 = boxes.new()
+    yy1 = boxes.new()
+    xx2 = boxes.new()
+    yy2 = boxes.new()
+    w = boxes.new()
+    h = boxes.new()
+
+    # keep = torch.Tensor()
+    count = 0
+    while idx.numel() > 0:
+        i = idx[-1]  # index of current largest val
+        # keep.append(i)
+        keep[count] = i
+        count += 1
+        if idx.size(0) == 1:
+            break
+        idx = idx[:-1]  # remove kept element from view
+        # load bboxes of next highest vals
+        torch.index_select(x1, 0, idx, out=xx1)
+        torch.index_select(y1, 0, idx, out=yy1)
+        torch.index_select(x2, 0, idx, out=xx2)
+        torch.index_select(y2, 0, idx, out=yy2)
+        # store element-wise max with next highest score
+        xx1 = torch.clamp(xx1, min=x1[i])
+        yy1 = torch.clamp(yy1, min=y1[i])
+        xx2 = torch.clamp(xx2, max=x2[i])
+        yy2 = torch.clamp(yy2, max=y2[i])
+        w.resize_as_(xx2)
+        h.resize_as_(yy2)
+        w = xx2 - xx1
+        h = yy2 - yy1
+        # check sizes of xx1 and xx2.. after each iteration
+        w = torch.clamp(w, min=0.0)
+        h = torch.clamp(h, min=0.0)
+        inter = w*h
+        # IoU = i / (area(a) + area(b) - i)
+        rem_areas = torch.index_select(area, 0, idx)  # load remaining areas)
+        union = (rem_areas - inter) + area[i]
+        IoU = inter/union  # store result in iou
+        # keep only elements with an IoU <= overlap
+        idx = idx[IoU.le(overlap)]
+
+    keep = keep[:count]
+    return instances[keep.to('cpu')]
+
+
 def offset_boxes(boxes, offset):
     new_boxes = boxes.clone()
     i, j = offset
@@ -100,14 +206,16 @@ def offset_masks(masks, offset):
     masks = masks.cpu()
     for mask in masks:
         polygon_mask = mask_to_polygons(mask)[0]
+        #print('\n\n')
+        #print(polygon_mask)
         for sub_polygon_mask in polygon_mask:
             sub_polygon_mask[::2] += i
             sub_polygon_mask[1::2] += j
         #polygon_mask[0][::2] += i
         #polygon_mask[0][1::2] += j
         polygon_masks.append(polygon_mask)
-        
     return polygon_masks
+
 
 def offset_instances(instances, offset, im_size):
     instance_dict = {
