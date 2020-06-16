@@ -2,6 +2,7 @@ import os
 import argparse
 import cv2
 from PIL import Image
+import numpy as np
     
 from google_drive_downloader import GoogleDriveDownloader as gdd
 
@@ -33,9 +34,11 @@ def main():
     model = BrightfieldPredictor(weights_path='models/bright-field.pth',
                                  confidence=args.confidence)
     
-    #out_image = model.predict_large(image)
-    out_image = model.predict_large_overlap(image)
-    out_image = Image.fromarray(out_image)
+    image = np.pad(image, ((30, 30), (30, 30), (0, 0)),
+          mode='constant', constant_values=0) 
+
+    predictions = model.predict_large(image)
+    out_img = model.visualize(image, predictions)
     out_image.save(args.out_path)
     
 if __name__ == '__main__':
