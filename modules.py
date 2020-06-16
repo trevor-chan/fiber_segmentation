@@ -72,6 +72,12 @@ class BrightfieldPredictor:
 
     def predict_large(self, im, span = 256, stride=96):
         print('test overlap')
+
+        #add padding
+        padding = 60
+        im = np.pad(im, ((padding, padding), (padding, padding), (0, 0)),
+                        mode='constant', constant_values=0) 
+
         im_height, im_width, _ = im.shape
         all_instances = []
 
@@ -88,11 +94,15 @@ class BrightfieldPredictor:
         all_instances = Instances.cat(all_instances)
         all_instances.pred_masks = np.asarray(all_instances.pred_masks, dtype=object)
         all_instances = nms(all_instances, overlap=0.6)
+
+        #strip padding
+        all_instances.pred_boxes.tensor -= padding
+        all_instances.pred_masks = [[comp - 60 for comp in mask] for mask in all_instances.pred_masks]
+
         return all_instances
     
 
 #def nonmax_suppression(instances):
-
 
 
 def exclude_boundary(instances, padding):
