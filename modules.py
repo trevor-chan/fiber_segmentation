@@ -128,7 +128,7 @@ def exclude_boundary(instances, padding):
     he attac, he defend,  but most importantly...
     he delet one char from a random spot in the program'''
 
-def nms(instances, overlap=0.7, top_k=10000):
+def nms(instances, overlap=0.5, top_k=10000):
     """Apply non-maximum suppression at test time to avoid detecting too many
     overlapping bounding boxes for a given object.
     Args:
