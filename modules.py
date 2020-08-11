@@ -200,7 +200,7 @@ def nms(instances, overlap=0.5, top_k=10000):
     return instances[keep.to('cpu')]
 
 def polygon_nms(instances, score_threshold = .7, top_k=10000, nms_threshold = .5):
-    from .nms_altered import nms
+    from nms_altered import nms
     polygons = instances.pred_masks
     scores = instances.scores
     
