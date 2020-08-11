@@ -16,7 +16,6 @@ import cv2
 import nms.helpers as help
 
 
-[docs]
 def rect_areas(rects):
     """Return an np.array of the areas of the rectangles
 
@@ -31,7 +30,6 @@ def rect_areas(rects):
     return w * h
 
 
-[docs]
 def rect_compare(box, boxes, area):
     """Calculate the intersection of box to boxes divided by area
 
@@ -68,9 +66,6 @@ def rect_compare(box, boxes, area):
 
     return (w * h)/area
 
-
-
-[docs]
 def poly_areas(polys):
     """Calculate the area of the list of polygons
 
@@ -86,7 +81,6 @@ def poly_areas(polys):
 
 
 
-[docs]
 def poly_compare(poly1, polygons, area):
     """Calculate the intersection of poly1 to polygons divided by area
 
@@ -109,7 +103,6 @@ def poly_compare(poly1, polygons, area):
 
 
 
-[docs]
 def nms(boxes, scores, **kwargs):
     """NMS using Malisiewicz et al. method
 
