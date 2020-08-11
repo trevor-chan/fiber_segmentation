@@ -203,9 +203,8 @@ def polygon_nms(instances, score_threshold = .7, top_k=10000, nms_threshold = .5
     polygons = instances.pred_masks
     scores = instances.scores
     
-    import nms
-    new_indices = nms.polygons(polygons, scores) #, nms_algorithm=<function nms>)
-    
+    from nms import nms
+    new_indices = nms.nms.nms_polygons(polygons, scores, score_threshold = .7, top_k=10000, nms_threshold = .5) #, nms_algorithm=<function nms>)
     return new_indices
 
 def offset_boxes(boxes, offset):
