@@ -200,11 +200,16 @@ def nms(instances, overlap=0.5, top_k=10000):
     return instances[keep.to('cpu')]
 
 def polygon_nms(instances, score_threshold = .7, top_k=10000, nms_threshold = .5):
+    from .nms_altered import nms
     polygons = instances.pred_masks
     scores = instances.scores
     
-    from nms import nms
-    new_indices = nms.polygons(polygons, scores, score_threshold = .7, top_k=10000, nms_threshold = .5) #, nms_algorithm=<function nms>)
+    kwargs['area_function'] = nms.poly_areas
+    kwargs['compare_function'] = nms.poly_compare
+    kwargs['score_threshold'] = .7
+    kwargs['top_k'] = 10000
+    kwargs['nms_threshold'] = .5
+    new_indices = nms.nms(polygons, scores, **kwargs) #, nms_algorithm=<function nms>)
     return new_indices
 
 def offset_boxes(boxes, offset):
