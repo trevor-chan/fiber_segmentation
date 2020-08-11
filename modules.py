@@ -204,7 +204,7 @@ def polygon_nms(instances, score_threshold = .7, top_k=10000, nms_threshold = .5
     scores = instances.scores
     
     import nms
-    new_indices = nms.nms.polygons(polygons, scores, nms_algorithm=<function nms>)
+    new_indices = nms.nms.polygons(polygons, scores) #, nms_algorithm=<function nms>)
     
     return new_indices
 
