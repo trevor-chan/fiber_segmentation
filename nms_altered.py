@@ -154,13 +154,15 @@ def nms(boxes, scores, **kwargs):
     if 'compare_function' in kwargs:
         compare_function = kwargs['compare_function']
     else:
-        compare_function = None
+        compare_function = poly_compare
+        #compare_function = None
     assert compare_function is not None
 
     if 'area_function' in kwargs:
         area_function = kwargs['area_function']
     else:
-        area_function = None
+        area_function = poly_areas
+        #area_function = None
     assert area_function is not None
 
     # if there are no boxes, return an empty list
