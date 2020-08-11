@@ -93,7 +93,8 @@ class BrightfieldPredictor:
 
         all_instances = Instances.cat(all_instances)
         all_instances.pred_masks = np.asarray(all_instances.pred_masks, dtype=object)
-        all_instances = nms(all_instances, overlap=0.6)
+        #all_instances = nms(all_instances, overlap=0.6)
+        all_instances = polygon_nms(all_instances)
 
         #strip padding
         all_instances.pred_boxes.tensor -= padding
@@ -198,6 +199,14 @@ def nms(instances, overlap=0.5, top_k=10000):
     keep = keep[:count]
     return instances[keep.to('cpu')]
 
+def polygon_nms(instances, score_threshold = .7, top_k=10000, nms_threshold = .5):
+    polygons = instances.pred_masks
+    scores = instances.scores
+    
+    import nms
+    new_indices = nms.nms.polygons(polygons, scores, nms_algorithm=<function nms>)
+    
+    return new_indices
 
 def offset_boxes(boxes, offset):
     new_boxes = boxes.clone()
