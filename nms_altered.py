@@ -78,8 +78,11 @@ def poly_areas(polys):
     
     def poly_area(polygon): #Implementation of Shoelace formula for calculation of polygon area
         polygon = np.transpose(polygon)
+        print(np.shape(polygon))
         x = polygon[0]
         y = polygon[1]
+        print(len(x))
+        print(len(y))
         return 0.5 * np.abs(np.dot(x,np.roll(y,1))-np.dot(y,np.roll(x,1)))
     
     for poly in polys:
