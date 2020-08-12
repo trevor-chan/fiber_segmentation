@@ -204,7 +204,7 @@ def polygon_nms(instances, score_threshold = .7, top_k=10000, nms_threshold = .5
     polygons = instances.pred_masks
     print(type(polygons))
     print(type(polygons[0])
-    poly_list = [np.reshape(polygon,(2,int(len(polygon)/2))) for polygon in polygons]
+    #poly_list = [np.reshape(polygon,(2,int(len(polygon)/2))) for polygon in polygons]
                 # pass list of lists of polygon vertices
     scores = instances.scores
     
