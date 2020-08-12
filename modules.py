@@ -207,10 +207,12 @@ def polygon_nms(instances, score_threshold = .7, top_k=10000, nms_threshold = .5
     print(type(polygons[0]))
     polygons = [np.reshape(polygons[0],(int(len(np.transpose(polygons[0]))/2),2)) for polygon in polygons]
                 # pass list of lists of polygon vertices
-    scores = instances.scores
     
+    scores = instances.scores
+
     new_indices = nms(polygons, scores, score_threshold = .7, top_k = 10000, nms_threshold = .5) #, nms_algorithm=<function nms>)
-    return new_indices
+    keep = torch.Tensor(new_indices).long()
+    return instances[keep.to('cpu')]
 
 def offset_boxes(boxes, offset):
     new_boxes = boxes.clone()
