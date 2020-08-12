@@ -203,12 +203,12 @@ def polygon_nms(instances, score_threshold = .7, top_k=10000, nms_threshold = .5
     from nms_altered import nms
     polygons = instances.pred_masks
     print(type(polygons))
-    print(type(polygons[0])
-    #poly_list = [np.reshape(polygon,(2,int(len(polygon)/2))) for polygon in polygons]
+    print(type(polygons[0]))
+    polygons = [np.reshape(polygon,(2,int(len(polygon)/2))) for polygon in polygons]
                 # pass list of lists of polygon vertices
     scores = instances.scores
     
-    new_indices = nms(poly_list, scores, score_threshold = .7, top_k = 10000, nms_threshold = .5) #, nms_algorithm=<function nms>)
+    new_indices = nms(polygons, scores, score_threshold = .7, top_k = 10000, nms_threshold = .5) #, nms_algorithm=<function nms>)
     return new_indices
 
 def offset_boxes(boxes, offset):
