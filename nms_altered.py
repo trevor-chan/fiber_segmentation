@@ -77,6 +77,7 @@ def poly_areas(polys):
     areas = []
     
     def poly_area(polygon): #Implementation of Shoelace formula for calculation of polygon area
+        if len(polygon) < 3: return 1
         polygon = np.transpose(polygon)
         print(np.shape(polygon))
         x = polygon[0]
