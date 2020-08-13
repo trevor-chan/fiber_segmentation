@@ -206,7 +206,7 @@ def polygon_nms(instances, score_threshold = .7, top_k=10000, nms_threshold = .5
         return max(poly, key = lambda i: len(i))
     polygons = instances.pred_masks
     polygons = [np.reshape(polygon,(int(len(np.transpose(polygon))/2),2)) for polygon in polygons]
-    polygons = [poly if isinstance(poly[0][0],int) else choose_larger(poly) for poly in polygons]
+    polygons = [poly if isinstance(poly[0][0][0],int) else choose_larger(poly) for poly in polygons]
                 # pass list of lists of polygon vertices
     
     scores = instances.scores
