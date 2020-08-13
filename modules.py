@@ -94,8 +94,8 @@ class BrightfieldPredictor:
         all_instances = Instances.cat(all_instances)
         all_instances.pred_masks = np.asarray(all_instances.pred_masks, dtype=object)
         
-        all_instances = nms(all_instances, overlap=0.6)
-        #all_instances = polygon_nms(all_instances)
+        #all_instances = nms(all_instances, overlap=0.6)
+        all_instances = polygon_nms(all_instances)
 
         #strip padding
         all_instances.pred_boxes.tensor -= padding
