@@ -102,7 +102,7 @@ def poly_compare(poly1, polygons, area):
     :rtype: :class:`numpy.ndarray`
     """
     
-    print(polygons)
+    print(poly1)
     
     def polygon_intersection_area(polygons):
         """ Compute the area of intersection of an array of polygons
@@ -126,7 +126,7 @@ def poly_compare(poly1, polygons, area):
         print("minx: ")
         print(minx)
 
-        if minx < 0:
+        if minx.any() < 0:
             dx = -int(minx)
             maxx = maxx + dx
         if miny < 0:
