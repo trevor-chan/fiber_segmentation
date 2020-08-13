@@ -191,7 +191,7 @@ def poly_compare(poly1, polygons, area):
     overlap = []
     for i,poly2 in enumerate(polygons):
         intersection_area = polygon_intersection_area([poly1, poly2])
-        print((intersection_area,area[i]))
+        #print((intersection_area,area[i]))
         overlap.append(intersection_area/area[i])
 
     return np.array(overlap)
