@@ -77,13 +77,10 @@ def poly_areas(polys):
     areas = []
     
     def poly_area(polygon): #Implementation of Shoelace formula for calculation of polygon area
-        if len(polygon) < 3: return 1
+        if len(polygon) < 3: return 1 #-------------------------------------------THIS NEEDS TO BE INVESTIGATED MORE-----point/line guesses?
         polygon = np.transpose(polygon)
-        print(np.shape(polygon))
         x = polygon[0]
         y = polygon[1]
-        print(len(x))
-        print(len(y))
         return 0.5 * np.abs(np.dot(x,np.roll(y,1))-np.dot(y,np.roll(x,1)))
     
     for poly in polys:
@@ -104,6 +101,8 @@ def poly_compare(poly1, polygons, area):
     :return: a numpy array of the ratio of overlap of poly1 to each of polygons to the corresponding area.  e.g. overlap(poly1, polygons[n])/area[n]
     :rtype: :class:`numpy.ndarray`
     """
+    
+    print(polygons)
     
     def polygon_intersection_area(polygons):
         """ Compute the area of intersection of an array of polygons
