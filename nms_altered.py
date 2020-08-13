@@ -142,9 +142,7 @@ def poly_compare(poly1, polygons, area):
                     cv2.line(img, (0, y * hashDistance), (hashLength, y * hashDistance), (0,0,255), 1)
 
             return img
-        
-        print("polygons: ")
-        print(polygons)
+
         
         if len(polygons) == 0:
             return 0
@@ -161,9 +159,7 @@ def poly_compare(poly1, polygons, area):
         minx = np.amin(np.array(polygons)[...,0])
         maxy = np.amax(np.array(polygons)[...,1])
         miny = np.amin(np.array(polygons)[...,1])'''
-        
-        print("minx: ")
-        print(minx)
+
 
         if minx < 0:
             dx = -int(minx)
