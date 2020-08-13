@@ -203,6 +203,7 @@ def polygon_nms(instances, score_threshold = .7, top_k=10000, nms_threshold = .5
     from nms_altered import nms
     polygons = instances.pred_masks
     polygons = [np.reshape(polygon,(int(len(np.transpose(polygon))/2),2)) for polygon in polygons]
+    polygons = [poly if len(poly) < 2 else poly[0] for poly in polygons]
                 # pass list of lists of polygon vertices
     
     scores = instances.scores

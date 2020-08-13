@@ -143,6 +143,7 @@ def poly_compare(poly1, polygons, area):
 
             return img
         
+        print("polygons: ")
         print(polygons)
         
         if len(polygons) == 0:
@@ -201,6 +202,7 @@ def poly_compare(poly1, polygons, area):
 
 
 def nms(boxes, scores, **kwargs):
+    #**  boxes is a list of polygons, each a list of vertices
     """NMS using Malisiewicz et al. method
 
     Adapted from  non_max_suppression_fast(boxes, overlapThresh) from
