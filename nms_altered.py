@@ -124,6 +124,7 @@ def poly_compare(poly1, polygons, area):
         maxy = np.amax(np.array(polygons)[...,1])
         miny = np.amin(np.array(polygons)[...,1])
         
+        print("minx: ")
         print(minx)
 
         if minx < 0:
