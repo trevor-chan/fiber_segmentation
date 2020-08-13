@@ -121,15 +121,20 @@ def poly_compare(poly1, polygons, area):
         dx = 0
         dy = 0
 
-        maxx = np.amax(np.array(polygons)[...,0])
+        maxx = max([np.amax(np.array(polygons)[i,0]) for i in range(len(polygons))])
+        minx = min([np.amin(np.array(polygons)[i,0]) for i in range(len(polygons))])
+        maxy = max([np.amax(np.array(polygons)[i,1]) for i in range(len(polygons))])
+        miny = min([np.amin(np.array(polygons)[i,1]) for i in range(len(polygons))])
+        
+        '''maxx = np.amax(np.array(polygons)[...,0])
         minx = np.amin(np.array(polygons)[...,0])
         maxy = np.amax(np.array(polygons)[...,1])
-        miny = np.amin(np.array(polygons)[...,1])
+        miny = np.amin(np.array(polygons)[...,1])'''
         
         print("minx: ")
         print(minx)
 
-        if minx.any() < 0:
+        if minx < 0:
             dx = -int(minx)
             maxx = maxx + dx
         if miny < 0:
