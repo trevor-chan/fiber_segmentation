@@ -203,11 +203,11 @@ def polygon_nms(instances, score_threshold = .7, top_k=10000, nms_threshold = .5
     from nms_altered import nms
     
     def choose_larger(poly):
-        return max(poly, key = lambda i: len(i))
+        return max(poly[0], key = lambda i: len(i))
     polygons = instances.pred_masks
     polygons = [np.reshape(polygon,(int(len(np.transpose(polygon))/2),2)) for polygon in polygons]
-    print(polygons)#---------------------------------------------------------------------------------------------------------
-    polygons = [poly if isinstance(poly[0][0][0],int) else choose_larger(poly) for poly in polygons]
+    #print(polygons)#---------------------------------------------------------------------------------------------------------
+    polygons = [choose_larger(poly) if isinstance(poly[0][0],np.ndarray) else poly for poly in polygons]
                 # pass list of lists of polygon vertices
     
     scores = instances.scores
