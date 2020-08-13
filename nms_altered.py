@@ -13,7 +13,7 @@ The functions in this module are not usually called directly.  Instead use :func
 """
 import numpy as np
 import cv2
-import nms.helpers as help
+#import nms.helpers as help
 
 
 def rect_areas(rects):
@@ -104,10 +104,58 @@ def poly_compare(poly1, polygons, area):
     :return: a numpy array of the ratio of overlap of poly1 to each of polygons to the corresponding area.  e.g. overlap(poly1, polygons[n])/area[n]
     :rtype: :class:`numpy.ndarray`
     """
+    
+    def polygon_intersection_area(polygons):
+        """ Compute the area of intersection of an array of polygons
+
+        :param polygons: a list of polygons
+        :type polygons: list
+        :return: the area of intersection of the polygons
+        :rtype: int
+        """
+        if len(polygons) == 0:
+            return 0
+
+        dx = 0
+        dy = 0
+
+        maxx = np.amax(np.array(polygons)[...,0])
+        minx = np.amin(np.array(polygons)[...,0])
+        maxy = np.amax(np.array(polygons)[...,1])
+        miny = np.amin(np.array(polygons)[...,1])
+        
+        print(minx)
+
+        if minx < 0:
+            dx = -int(minx)
+            maxx = maxx + dx
+        if miny < 0:
+            dy = -int(miny)
+            maxy = maxy + dy
+        # (dx, dy) is used as an offset in fillPoly
+
+        for i, polypoints in enumerate(polygons):
+
+            newImage = createImage(maxx, maxy, 1)
+
+            polypoints = np.array(polypoints, np.int32)
+            polypoints = polypoints.reshape(-1, 1, 2)
+
+            cv2.fillPoly(newImage, [polypoints], (255, 255, 255), cv2.LINE_8, 0, (dx, dy))
+
+            if(i == 0):
+                compositeImage = newImage
+            else:
+                compositeImage = cv2.bitwise_and(compositeImage, newImage)
+
+            area = cv2.countNonZero(compositeImage)
+
+        return area
+    
     # return intersection of poly1 with polys[i]/area[i]
     overlap = []
     for i,poly2 in enumerate(polygons):
-        intersection_area = help.polygon_intersection_area([poly1, poly2])
+        intersection_area = polygon_intersection_area([poly1, poly2])
         overlap.append(intersection_area/area[i])
 
     return np.array(overlap)
@@ -143,6 +191,45 @@ def nms(boxes, scores, **kwargs):
       this function must accept two boxes and return an overlap ratio between 0 and 1
     - area_function (function): function used to calculate the area of an element of boxes
     """
+    
+    
+    def get_max_score_index(scores, threshold=0, top_k=0, descending=True):
+        """ Get the max scores with corresponding indicies
+
+        Adapted from the OpenCV c++ source in 
+        `nms.inl.hpp <https://github.com/opencv/opencv/blob/ee1e1ce377aa61ddea47a6c2114f99951153bb4f/modules/dnn/src/nms.inl.hpp#L33>`__
+
+        :param scores: a list of scores
+        :type scores: list
+        :param threshold: consider scores higher than this threshold
+        :type threshold: float
+        :param top_k: return at most top_k scores; if 0, keep all
+        :type top_k: int
+        :param descending: if True, list is returened in descending order, else ascending
+        :returns: a  sorted by score list  of [score, index]
+        """
+        score_index = []
+
+        # Generate index score pairs
+        for i, score in enumerate(scores):
+            if (threshold > 0) and (score > threshold):
+                score_index.append([score, i])
+            else:
+                score_index.append([score, i])
+
+        # Sort the score pair according to the scores in descending order
+        npscores = np.array(score_index)
+
+        if descending:
+            npscores = npscores[npscores[:,0].argsort()[::-1]] #descending order
+        else:
+            npscores = npscores[npscores[:,0].argsort()] # ascending order
+
+        if top_k > 0:
+            npscores = npscores[0:top_k]
+
+        return npscores.tolist()
+    
 
     if 'top_k' in kwargs:
         top_k = kwargs['top_k']
@@ -201,7 +288,7 @@ def nms(boxes, scores, **kwargs):
     # sort the boxes by score or the bottom-right y-coordinate of the bounding box
     if scores is not None:
         # sort the bounding boxes by the associated scores
-        scores = help.get_max_score_index(scores, score_threshold, top_k, False)
+        scores = get_max_score_index(scores, score_threshold, top_k, False)
         idxs = np.array(scores, np.int32)[:, 1]
         # idxs = np.argsort(scores)
     else:
