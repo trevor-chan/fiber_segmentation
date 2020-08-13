@@ -102,8 +102,6 @@ def poly_compare(poly1, polygons, area):
     :rtype: :class:`numpy.ndarray`
     """
     
-
-    
     def polygon_intersection_area(polygons):
         """ Compute the area of intersection of an array of polygons
 
@@ -112,6 +110,38 @@ def poly_compare(poly1, polygons, area):
         :return: the area of intersection of the polygons
         :rtype: int
         """
+        
+        def createImage(width=800, height=800, depth=3):
+            """ Return a black image with an optional scale on the edge
+
+            :param width: width of the returned image
+            :type width: int
+            :param height: height of the returned image
+            :type height: int
+            :param depth: either 3 (rgb/bgr) or 1 (mono).  If 1, no scale is drawn
+            :type depth: int
+            :return: A zero'd out matrix/black image of size (width, height)
+            :rtype: :class:`numpy.ndarray`
+            """
+            # create a black image and put a scale on the edge
+
+            assert depth == 3 or depth == 1
+            assert width > 0
+            assert height > 0
+
+            hashDistance = 50
+            hashLength = 20
+
+            img = np.zeros((int(height), int(width), depth), np.uint8)
+
+            if(depth == 3):
+                for x in range(0, int(width / hashDistance)):
+                    cv2.line(img, (x * hashDistance, 0), (x * hashDistance, hashLength), (0,0,255), 1)
+
+                for y in range(0, int(width / hashDistance)):
+                    cv2.line(img, (0, y * hashDistance), (hashLength, y * hashDistance), (0,0,255), 1)
+
+            return img
         
         print(polygons)
         
