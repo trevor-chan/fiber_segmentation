@@ -71,7 +71,7 @@ class BrightfieldPredictor:
         return Image.fromarray(v.get_image()[:, :, ::-1])
 
     def predict_large(self, im, span = 256, stride=96):
-        print('test overlap')
+        print('run model')
 
         #add padding
         padding = 60
@@ -202,12 +202,12 @@ def nms(instances, overlap=0.5, top_k=10000):
 
 def polygon_nms(instances, score_threshold = .7, top_k=10000, nms_threshold = .5):
     from nms_altered import nms
+    print('ran poly_nms')
     
     def choose_larger(poly):
         return max(poly[0], key = lambda i: len(i))
     polygons = instances.pred_masks
     polygons = [np.reshape(polygon,(int(len(np.transpose(polygon))/2),2)) for polygon in polygons]
-    #print(polygons)#---------------------------------------------------------------------------------------------------------
     polygons = [choose_larger(poly) if isinstance(poly[0][0],np.ndarray) else poly for poly in polygons]
                 # pass list of lists of polygon vertices
     
