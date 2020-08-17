@@ -96,7 +96,7 @@ class BrightfieldPredictor:
         
         if nms == 'polygon':
             all_instances = polygon_nms(all_instances)
-        else if nms == 'bbox':
+        elif nms == 'bbox':
             all_instances = nms(all_instances, overlap=0.6)
         else:
             assert False, 'nms algorithm must be polygon or bbox'
