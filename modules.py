@@ -100,7 +100,6 @@ class BrightfieldPredictor:
             all_instances = nms(all_instances, overlap=0.6)
         else:
             assert False, 'nms algorithm must be polygon or bbox'
-        assert nms = 'polygon' or nms = 'bbox'
 
         #strip padding
         all_instances.pred_boxes.tensor -= padding
