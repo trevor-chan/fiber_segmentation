@@ -70,7 +70,7 @@ class BrightfieldPredictor:
         v = v.draw_instance_predictions(all_instances.to("cpu"))
         return Image.fromarray(v.get_image()[:, :, ::-1])
 
-    def predict_large(self, im, span = 256, stride=96, nms = 'polygon'):
+    def predict_large(self, im, span = 256, stride=96, nmsalg = 'poly'):
         print('run model')
 
         #add padding
@@ -94,9 +94,9 @@ class BrightfieldPredictor:
         all_instances = Instances.cat(all_instances)
         all_instances.pred_masks = np.asarray(all_instances.pred_masks, dtype=object)
         
-        if nms == 'polygon':
+        if nmsalg == 'poly':
             all_instances = polygon_nms(all_instances)
-        elif nms == 'bbox':
+        elif nmsalg == 'bbox':
             all_instances = nms(all_instances, overlap=0.6)
         else:
             assert False, 'nms algorithm must be polygon or bbox'
