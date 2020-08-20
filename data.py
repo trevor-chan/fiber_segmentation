@@ -13,7 +13,7 @@ import os
 import shutil
 from tqdm import tqdm
 from multiprocessing import Process, Queue
-
+   
 import pycocotools
 from detectron2.structures import BoxMode
 
