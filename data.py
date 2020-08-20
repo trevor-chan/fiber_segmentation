@@ -202,11 +202,11 @@ def main():
                      'image_part_007.jpg',
                      'image_part_008.jpg',
                      
-                     'MC171180.JPG',
-                     'MC171177.JPG',
-                     'MC171179.JPG',
-                     'MC171181.JPG',
-                     'MC171178.JPG',
+                     #'MC171180.JPG',
+                     #'MC171177.JPG',
+                     #'MC171179.JPG',
+                     #'MC171181.JPG',
+                     #'MC171178.JPG',
         
                      '1758_part_004.jpg',
                      '1758_part_011.jpg',
@@ -215,9 +215,9 @@ def main():
                      '1730_part_009.jpg',
                      '0467_part_010.jpg',
                      '0467_part_003.jpg',
-                     '1773_train.JPG',
-                     '1133_train.JPG',
-                     '0576_train.JPG',
+                     #'1773_train.JPG',
+                     #'1133_train.JPG',
+                     #'0576_train.JPG',
                     ]
     
     
@@ -226,7 +226,8 @@ def main():
                      'datasets/cells_train_256',
                      samples_per_img=samples_per_img,
                      selected_ids=train_dataset,
-                     crop_size=crop_size) #, num_processes = 1)
+                     crop_size=crop_size,
+                     num_processes = 1)
 
 if __name__ == '__main__':
     main()
