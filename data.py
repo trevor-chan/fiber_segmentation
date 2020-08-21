@@ -227,7 +227,8 @@ def main():
                      samples_per_img=samples_per_img,
                      selected_ids=train_dataset,
                      crop_size=crop_size,
-                     num_processes = 1)
+                     num_processes = 1,
+                     num_threads = 7)
 
 if __name__ == '__main__':
     main()
