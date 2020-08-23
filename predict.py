@@ -26,9 +26,10 @@ def main():
 
 
     if not os.path.exists('models/bright-field.pth'):
-        gdd.download_file_from_google_drive(file_id='12I6W9SeHFmDSHLoJKp3iNSry3gw8ILAJ',
+        gdd.download_file_from_google_drive(file_id='1dpn0xVD4pJmRtqzyLTUJ2ERjwLvRxWVM',
                                             dest_path='./models/bright-field.pth',
                                             unzip=False)
+        # 12I6W9SeHFmDSHLoJKp3iNSry3gw8ILAJ <- old model weights
 
     image = cv2.imread(args.in_path)
     model = BrightfieldPredictor(weights_path='models/bright-field.pth',
