@@ -15,7 +15,7 @@ from detectron2.structures.instances import Instances
 import data
 
 class BrightfieldPredictor:
-    def __init__(self, weights_path=None, confidence=0.7):  
+    def __init__(self, weights_path=None, confidence=0.7):
         cfg = get_cfg()
         cfg.merge_from_file(model_zoo.get_config_file("COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml"))
         cfg.DATALOADER.NUM_WORKERS = 2
@@ -32,29 +32,30 @@ class BrightfieldPredictor:
         if weights_path is not None:
             cfg.MODEL.WEIGHTS = weights_path
         else:
-            cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml")  # Let training initialize from 
-    
+            cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml")  # Let training initialize from
+
         self.cfg = cfg
-        
+
         MetadataCatalog.get('training_dataset').set(thing_classes=['cell'])
         self.metadata = MetadataCatalog.get('training_dataset')
-        
+
         self.prediction_model = DefaultPredictor(self.cfg)
-    
-    def train(self, dataset_path):
+
+    def train(self, dataset_path, max_iterations=30000):
         DatasetCatalog.register('training_dataset', lambda : data.to_coco(dataset_path))
         self.cfg.DATASETS.TRAIN = ('training_dataset',)
         self.cfg.DATASETS.TEST = ()
-        
+        self.cfg.SOLVER.MAX_ITER = max_iterations
+
         trainer = DefaultTrainer(self.cfg)
         trainer.resume_or_load(resume=False)
         trainer.train()
-        
+
     def predict(self, im):
             outputs = self.prediction_model(im)
             v = Visualizer(im[:, :, ::-1],
-                           metadata=self.metadata, 
-                           scale=3.0, 
+                           metadata=self.metadata,
+                           scale=3.0,
                            instance_mode=ColorMode.IMAGE_BW   # remove the colors of unsegmented pixels
             )
             v = v.draw_instance_predictions(outputs["instances"].to("cpu"))
@@ -63,8 +64,8 @@ class BrightfieldPredictor:
 
     def visualize(self, im, all_instances):
         v = Visualizer(im[:, :, ::-1],
-                  metadata=self.metadata, 
-                  scale=2.0, 
+                  metadata=self.metadata,
+                  scale=2.0,
                   #instance_mode=ColorMode.IMAGE_BW
         )
         v = v.draw_instance_predictions(all_instances.to("cpu"))
@@ -76,7 +77,7 @@ class BrightfieldPredictor:
         #add padding
         padding = 60
         im = np.pad(im, ((padding, padding), (padding, padding), (0, 0)),
-                        mode='constant', constant_values=0) 
+                        mode='constant', constant_values=0)
 
         im_height, im_width, _ = im.shape
         all_instances = []
@@ -93,7 +94,7 @@ class BrightfieldPredictor:
 
         all_instances = Instances.cat(all_instances)
         all_instances.pred_masks = np.asarray(all_instances.pred_masks, dtype=object)
-        
+
         if nmsalg == 'poly':
             all_instances = polygon_nms(all_instances)
         elif nmsalg == 'bbox':
@@ -106,7 +107,7 @@ class BrightfieldPredictor:
         all_instances.pred_masks = [[comp - 60 for comp in mask] for mask in all_instances.pred_masks]
 
         return all_instances
-    
+
 
 #def nonmax_suppression(instances):
 
@@ -126,10 +127,10 @@ def exclude_boundary(instances, padding):
             (box_centers[:, 0] < image_height - padding) &
             (box_centers[:, 1] < image_width - padding))
     return instances[keep]
-    
+
     '''alright, it's time for the big boys to take over the computer typey typey
     things. nothing wrong can do to the bigger dinosaur. woW! that isn't a very
-    good bOx oF cElLz. 
+    good bOx oF cElLz.
 
     he attac, he defend,  but most importantly...
     he delet one char from a random spot in the program'''
@@ -207,16 +208,16 @@ def nms(instances, overlap=0.5, top_k=10000):
 def polygon_nms(instances, score_threshold = .7, top_k=10000, nms_threshold = .5):
     from nms_altered import nms
     print('ran poly_nms')
-    
+
     def choose_larger(poly):
         #print(poly)
         return max(poly, key = lambda i: len(i))
-    
+
     polygons = instances.pred_masks
     polygons = [choose_larger(poly) if (len(poly) > 1) else poly[0] for poly in polygons]
     polygons = [np.reshape(polygon,(int(len(np.transpose(polygon))/2),2)) for polygon in polygons]
     # pass list of lists of polygon vertices
-    
+
     scores = instances.scores
 
     new_indices = nms(polygons, scores, score_threshold = .7, top_k = 10000, nms_threshold = .5) #, nms_algorithm=<function nms>)
