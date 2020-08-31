@@ -4,7 +4,7 @@ import os
 import matplotlib.pyplot as plt
 from sys import argv
 
-model = BrightfieldPredictor(weights_path='.models/bright_field.pth', confidence=0.6)
+model = BrightfieldPredictor(weights_path='.models/bright-field.pth', confidence=0.6)
 
 assert len(argv) > 1, "missing data file"
 
