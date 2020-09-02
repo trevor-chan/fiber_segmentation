@@ -22,5 +22,5 @@ instance_dict = {
     "image_size": instances.image_size,
 }
 
-with open('instances'+file_name[2:-4]+'.data', 'wb') as filehandle:
+with open(file_name[0:-5]+'_instances.data', 'wb') as filehandle:
     pickle.dump(instance_dict, filehandle)
