@@ -3,6 +3,7 @@ import cv2
 import os
 import matplotlib.pyplot as plt
 from sys import argv
+import pickle
 
 model = BrightfieldPredictor(weights_path='./models/bright-field.pth', confidence=0.6)
 
