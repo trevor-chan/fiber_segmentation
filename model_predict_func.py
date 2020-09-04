@@ -11,6 +11,9 @@ assert len(argv) > 1, "missing data file"
 
 file_name = argv[1]
 
+if os.path.isfile(file_name[0:-4]+'_instances.data'):
+    sys.exit(file_name[0:-4]+'_instances.data'+' already exists')
+
 image = cv2.imread(file_name)
 
 instances = model.predict_large(image)
