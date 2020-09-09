@@ -98,7 +98,7 @@ class BrightfieldPredictor:
         if nmsalg == 'poly':
             all_instances = polygon_nms(all_instances)
         elif nmsalg == 'bbox':
-            all_instances = nms(all_instances, overlap=0.6)
+            all_instances = bbox_nms(all_instances, overlap=0.6)
         else:
             assert False, 'nms algorithm must be polygon or bbox'
 
@@ -135,7 +135,7 @@ def exclude_boundary(instances, padding):
     he attac, he defend,  but most importantly...
     he delet one char from a random spot in the program'''
 
-def nms(instances, overlap=0.65, top_k=10000):
+def bbox_nms(instances, overlap=0.65, top_k=10000):
     """Apply non-maximum suppression at test time to avoid detecting too many
     overlapping bounding boxes for a given object.
     Args:
@@ -210,7 +210,7 @@ def polygon_nms(instances, score_threshold = .7, top_k=10000, nms_threshold = .5
     print('ran poly_nms')
     
     #RUN BB NMS first to preemptively cut masks - function nms is overloaded here, should rename so as not to confuse
-    instances = nms(instances)
+    instances = bbox_nms(instances)
 
     def choose_larger(poly):
         #print(poly)
