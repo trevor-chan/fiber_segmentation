@@ -12,15 +12,18 @@ model = BrightfieldPredictor(weights_path='./models/bright-field.pth', confidenc
 assert len(argv) > 1, "missing data file"
 
 file_name = argv[1]
+rerun = 0
+if argv[2] == 'rerun':
+    rerun = 1
 
 #if both output files exist, exit
-if os.path.isfile(file_name[0:-4]+'_instances.data') and os.path.isfile(file_name[0:-4]+'_visual.JPG'):
+if os.path.isfile(file_name[0:-4]+'_instances.data') and os.path.isfile(file_name[0:-4]+'_visual.JPG') and rerun == 0:
     sys.exit(file_name[0:-4]+'_instances.data'+' and '+file_name[0:-4]+'_visual.JPG'+' already exist')
 
 image = cv2.imread(file_name)
 
 #if instance file does not exist, run model; else, load in instance file to Instances object (required for visualizer)
-if not os.path.isfile(file_name[0:-4]+'_instances.data'):
+if not os.path.isfile(file_name[0:-4]+'_instances.data') or rerun == 1:
     
     instances = model.predict_large(image)
     #instances = instances.to('cpu')
@@ -49,7 +52,7 @@ else:
     instances = Instances(instance_dict['image_size'], **kwargs)
     
 #if check here not really necessary, visual output will never be produced unless the model has been run
-if not os.path.isfile(file_name[0:-4]+'_visual.JPG'):
+if not os.path.isfile(file_name[0:-4]+'_visual.JPG') or rerun == 0:
     print('output verification saved to '+file_name[0:-4]+'_visual.JPG')
     out_img = model.visualize(image,instances)
 
