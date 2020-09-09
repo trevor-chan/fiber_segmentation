@@ -135,7 +135,7 @@ def exclude_boundary(instances, padding):
     he attac, he defend,  but most importantly...
     he delet one char from a random spot in the program'''
 
-def nms(instances, overlap=0.5, top_k=10000):
+def nms(instances, overlap=0.65, top_k=10000):
     """Apply non-maximum suppression at test time to avoid detecting too many
     overlapping bounding boxes for a given object.
     Args:
@@ -208,6 +208,9 @@ def nms(instances, overlap=0.5, top_k=10000):
 def polygon_nms(instances, score_threshold = .7, top_k=10000, nms_threshold = .5):
     from nms_altered import nms
     print('ran poly_nms')
+    
+    #RUN BB NMS first to preemptively cut masks - function nms is overloaded here, should rename so as not to confuse
+    instances = nms(instances)
 
     def choose_larger(poly):
         #print(poly)

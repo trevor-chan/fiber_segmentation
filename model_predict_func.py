@@ -12,20 +12,43 @@ assert len(argv) > 1, "missing data file"
 
 file_name = argv[1]
 
-if os.path.isfile(file_name[0:-4]+'_instances.data'):
-    sys.exit(file_name[0:-4]+'_instances.data'+' already exists')
+#if both output files exist, exit
+if os.path.isfile(file_name[0:-4]+'_instances.data') and os.path.isfile(file_name[0:-4]+'_visual.JPG'):
+    sys.exit(file_name[0:-4]+'_instances.data'+' and '+file_name[0:-4]+'_visual.JPG'+' already exist')
 
 image = cv2.imread(file_name)
 
-instances = model.predict_large(image)
-#instances = instances.to('cpu')
-instance_dict = {
-    "pred_boxes":instances.pred_boxes.tensor,
-    "pred_masks":instances.pred_masks,
-    "scores":instances.scores,
-    "classes":instances.pred_classes,
-    "image_size": instances.image_size,
-}
+#if instance file does not exist, run model; else, load in instance file to Instances object (required for visualizer)
+if not os.path.isfile(file_name[0:-4]+'_instances.data'):
 
-with open(file_name[0:-4]+'_instances.data', 'wb') as filehandle:
-    pickle.dump(instance_dict, filehandle)
+    instances = model.predict_large(image)
+    #instances = instances.to('cpu')
+    instance_dict = {
+        "pred_boxes":instances.pred_boxes.tensor,
+        "pred_masks":instances.pred_masks,
+        "scores":instances.scores,
+        "classes":instances.pred_classes,
+        "image_size": instances.image_size,
+    }
+    with open(file_name[0:-4]+'_instances.data', 'wb') as filehandle:
+        pickle.dump(instance_dict, filehandle)
+        
+else:
+    #load an instances object from reading file
+    with open(file_name[0:-4]+'_instances.data', 'rb') as filehandle:
+        instance_dict = pickle.load(filehandle)
+    
+    kwargs = {
+            'pred_boxes':Boxes(instance_dict['pred_boxes']),
+            'pred_masks':instance_dict['pred_masks'],
+            'scores':instance_dict['scores'],
+            'pred_classes':instance_dict['classes'],
+            }
+    instances = Instances(instance_dict['image_size'], **kwargs)
+    
+#if check here not really necessary, visual output will never be produced unless the model has been run
+if not os.path.isfile(file_name[0:-4]+'_visual.JPG'):
+
+    out_img = model.visualize(image,instances)
+
+    out_img.save(file_name[0:-4]+'_visual.JPG')
