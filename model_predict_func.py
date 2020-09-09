@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import pickle
 import sys
 from sys import argv
+from detectron2.structures import Instances, Boxes
 
 model = BrightfieldPredictor(weights_path='./models/bright-field.pth', confidence=0.6)
 
