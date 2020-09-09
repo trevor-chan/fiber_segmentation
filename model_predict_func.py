@@ -21,7 +21,7 @@ image = cv2.imread(file_name)
 
 #if instance file does not exist, run model; else, load in instance file to Instances object (required for visualizer)
 if not os.path.isfile(file_name[0:-4]+'_instances.data'):
-
+    
     instances = model.predict_large(image)
     #instances = instances.to('cpu')
     instance_dict = {
@@ -36,6 +36,7 @@ if not os.path.isfile(file_name[0:-4]+'_instances.data'):
         
 else:
     #load an instances object from reading file
+    print('load instances from '+file_name[0:-4]+'_instances.data')
     with open(file_name[0:-4]+'_instances.data', 'rb') as filehandle:
         instance_dict = pickle.load(filehandle)
     
@@ -49,7 +50,7 @@ else:
     
 #if check here not really necessary, visual output will never be produced unless the model has been run
 if not os.path.isfile(file_name[0:-4]+'_visual.JPG'):
-
+    print('output verification saved to '+file_name[0:-4]+'_visual.JPG')
     out_img = model.visualize(image,instances)
 
     out_img.save(file_name[0:-4]+'_visual.JPG')
