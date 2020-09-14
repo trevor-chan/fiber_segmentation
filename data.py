@@ -200,14 +200,15 @@ def download_dataset(json_path, out_path, samples_per_img=100, num_threads=16, n
 
 def main():
     ##########################
-    json_path = 'datasets/export-2020-08-21T20 16 28.026Z.json'
+    json_path = '/home/trevor/Downloads/celegansdata.json'   #'datasets/export-2020-08-21T20 16 28.026Z.json'
     samples_per_img = 300
     crop_size = 256
     ##########################
     print('download dataset')
 
 
-    train_dataset = [
+    train_dataset = []
+    '''
                      'image_part_001.jpg',
                      'image_part_002.jpg',
                      'image_part_003.jpg',
@@ -234,16 +235,18 @@ def main():
                      '1133_train.JPG',
                      '0576_train.JPG',
                     ]
+    '''
 
 
 
     download_dataset(json_path,
-                     'datasets/cells_train_256',
+                     'datasets/celegans',
                      samples_per_img=samples_per_img,
-                     selected_ids=train_dataset,
+                     #selected_ids=train_dataset,
                      crop_size=crop_size,
                      num_processes = 12,
                      num_threads = 16)
+    
 
 if __name__ == '__main__':
     main()

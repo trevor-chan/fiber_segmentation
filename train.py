@@ -3,9 +3,9 @@ import data
 import modules
 
 ################### HYPERPARAMS ###################
-dataset_path = 'datasets/cells_train_256'
+dataset_path = 'datasets/celegans'   #'datasets/cells_train_256'
 MAX_ITERATIONS = 100000
-output_dir = 'models/256'
+output_dir = 'models/celegans256' #'models/256'
 ###################################################
 
 def main():
