@@ -200,47 +200,21 @@ def download_dataset(json_path, out_path, samples_per_img=100, num_threads=16, n
 
 def main():
     ##########################
-    json_path = '/home/trevor/Downloads/celegansdata.json'   #'datasets/export-2020-08-21T20 16 28.026Z.json'
+    json_path = 'datasets/export-2020-09-24T13 50 37.489Z.json'   #'datasets/export-2020-08-21T20 16 28.026Z.json'
     samples_per_img = 300
     crop_size = 256
     ##########################
     print('download dataset')
 
 
-    train_dataset = []
-    '''
+    train_dataset = [
                      'image_part_001.jpg',
                      'image_part_002.jpg',
-                     'image_part_003.jpg',
                      'image_part_004.jpg',
-                     'image_part_005.jpg',
-                     'image_part_006.jpg',
-                     'image_part_007.jpg',
-                     'image_part_008.jpg',
-
-                     'MC171180.JPG',
-                     'MC171177.JPG',
-                     'MC171179.JPG',
-                     'MC171181.JPG',
-                     'MC171178.JPG',
-
-                     '1758_part_004.jpg',
-                     '1758_part_011.jpg',
-                     '1758_part_008.jpg',
-                     '1755_part_004.jpg',
-                     '1730_part_009.jpg',
-                     '0467_part_010.jpg',
-                     '0467_part_003.jpg',
-                     '1773_train.JPG',
-                     '1133_train.JPG',
-                     '0576_train.JPG',
                     ]
-    '''
-
-
 
     download_dataset(json_path,
-                     'datasets/celegans',
+                     'datasets/collagen_confocal',
                      samples_per_img=samples_per_img,
                      #selected_ids=train_dataset,
                      crop_size=crop_size,
